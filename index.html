@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Receipt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+        .receipt {
+            width: 8.5in;
+            padding: 0.5in;
+            box-sizing: border-box;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 16px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        .header p {
+            font-size: 12px;
+            margin: 3px 0;
+        }
+        .title {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 15px 0;
+            text-decoration: underline;
+        }
+        .content {
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        .details {
+            width: 100%;
+            margin: 15px 0;
+            border-collapse: collapse;
+        }
+        .details td {
+            padding: 8px;
+        }
+        .details td:first-child {
+            font-weight: bold;
+            width: 40%;
+        }
+        .signature-section {
+            margin-top: 30px;
+            width: 100%;
+        }
+        .signature-line {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        .signature-name {
+            border-top: 1px solid #000;
+            margin-top: 40px;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+        .input-section {
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .date-input {
+            text-align: right;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        @media print {
+            body {
+                background-color: white;
+                margin: 0;
+                padding: 0;
+            }
+            .input-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Input Section -->
+    <div class="input-section">
+        <div class="input-group">
+            <label for="receiptDate">Receipt Date:</label>
+            <input type="date" id="receiptDate" oninput="updateReceipt()">
+        </div>
+        <div class="input-group">
+            <label for="salutation">Salutation:</label>
+            <select id="salutation" oninput="updateReceipt()">
+                <option value="MR.">MR.</option>
+                <option value="MS.">MS.</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="name">Client Name:</label>
+            <input type="text" id="name" placeholder="Enter Client Name" oninput="updateReceipt()">
+        </div>
+        <div class="input-group">
+            <label for="amount">Amount:</label>
+            <input type="text" id="amount" placeholder="Enter Amount" oninput="updateReceipt()">
+        </div>
+        <div class="input-group">
+            <label for="dueDate">Due Date:</label>
+            <input type="date" id="dueDate" oninput="updateReceipt()">
+        </div>
+        <div class="input-group">
+            <label for="agent">Agent Name:</label>
+            <input type="text" id="agent" placeholder="Enter Agent Name" oninput="updateReceipt()">
+        </div>
+    </div>
+
+    <!-- Receipt -->
+    <div class="receipt">
+        <div class="date-input" id="displayReceiptDate"></div>
+        
+        <div class="header">
+            <h1>QUINTILLA GROUP</h1>
+            <p>Door 3 & 4 Iloilo New Life Commercial Building</p>
+            <p>Mabini Corner Texas St., Sampaguita Iloilo City 5000</p>
+            <p>Tel. No.: 500-2527</p>
+        </div>
+
+        <div class="title">TRUST RECEIPT</div>
+
+        <div class="content">
+            <p>I hereby acknowledged the amount of <span id="displayAmount">Php ______</span> which I received from <span id="displayFrom">MS. LOIDA QUINTILLA</span>, details as follows;</p>
+            
+            <table class="details">
+                <tr>
+                    <td>PARTICULAR</td>
+                    <td>RESERVATION</td>
+                </tr>
+                <tr>
+                    <td>AMOUNT DUE</td>
+                    <td id="displayAmountDue">PHP ______</td>
+                </tr>
+            </table>
+
+            <p>I promised to pay the said amount on or before <span id="displayDueDate">__________</span></p>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-line">
+                <div class="signature-box">
+                    <p>Received:</p>
+                    <div class="signature-name" id="displayClientName"></div>
+                </div>
+                <div class="signature-box">
+                    <p>Guarantor:</p>
+                    <div class="signature-name" id="displayAgentName"></div>
+                </div>
+            </div>
+            
+            <div class="signature-line" style="margin-top: 30px;">
+                <div class="signature-box">
+                    <p>Witness:</p>
+                    <div class="signature-name">Dean Victor Montalvo</div>
+                </div>
+                <div class="signature-box">
+                    <p>&nbsp;</p>
+                    <div class="signature-name">Edelyn Shaine Fernandez</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateReceipt() {
+            // Get input values
+            const receiptDate = document.getElementById('receiptDate').value;
+            const salutation = document.getElementById('salutation').value;
+            const name = document.getElementById('name').value;
+            const amount = document.getElementById('amount').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const agent = document.getElementById('agent').value;
+
+            // Format dates
+            const formattedReceiptDate = receiptDate ? new Date(receiptDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '__________';
+            const formattedDueDate = dueDate ? new Date(dueDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '__________';
+
+            // Format amount
+            const formattedAmount = amount ? `Php ${parseFloat(amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'Php ______';
+            const formattedAmountDue = amount ? `PHP ${parseFloat(amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'PHP ______';
+
+            // Update receipt
+            document.getElementById('displayReceiptDate').textContent = formattedReceiptDate;
+            document.getElementById('displayAmount').textContent = formattedAmount;
+            document.getElementById('displayAmountDue').textContent = formattedAmountDue;
+            document.getElementById('displayDueDate').textContent = formattedDueDate;
+            document.getElementById('displayClientName').textContent = name ? `${salutation} ${name.toUpperCase()}` : '';
+            document.getElementById('displayAgentName').textContent = agent ? agent.toUpperCase() : '';
+        }
+
+        // Set default receipt date to today
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('receiptDate').value = today;
+            updateReceipt();
+        };
+    </script>
+</body>
+</html>
