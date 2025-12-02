@@ -4,196 +4,316 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trust Receipt</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f9f9f9;
-        }
-        .receipt {
-            width: 8.5in;
-            padding: 0.5in;
+        * {
             box-sizing: border-box;
-            background-color: #fff;
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #f5f5f5;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 10px;
+        .page-container {
+            width: 8.5in;
+            min-height: 11in;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            margin: 0 auto;
         }
-        .header h1 {
-            font-size: 16px;
-            margin: 5px 0;
-            font-weight: bold;
+        .content-wrapper {
+            display: flex;
+            height: 100%;
         }
-        .header p {
+        .form-section {
+            width: 35%;
+            padding: 15px;
+            background: #f9f9f9;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            max-height: 11in;
+        }
+        .receipt-section {
+            width: 65%;
+            padding: 20px 30px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
             font-size: 12px;
-            margin: 3px 0;
+            font-weight: bold;
+            margin-bottom: 3px;
         }
-        .title {
-            text-align: center;
+        input, select {
+            width: 100%;
+            padding: 6px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        button {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 8px;
+            width: 100%;
             font-size: 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        button:hover {
+            background: #34495e;
+        }
+        .receipt-header {
+            text-align: left;
+            margin-bottom: 15px;
+            line-height: 1.1;
+        }
+        .receipt-header h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .company-info {
+            font-size: 12px;
+            line-height: 1.1;
+            margin-bottom: 5px;
+        }
+        .receipt-title {
+            text-align: center;
+            font-size: 20px;
             font-weight: bold;
             margin: 15px 0;
             text-decoration: underline;
         }
-        .content {
+        .receipt-date {
+            text-align: left;
             font-size: 12px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
-        .details {
+        .receipt-content {
+            font-size: 12px;
+            line-height: 1.3;
+        }
+        .receipt-table {
             width: 100%;
-            margin: 15px 0;
             border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 12px;
         }
-        .details td {
-            padding: 8px;
+        .receipt-table th, .receipt-table td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: left;
         }
-        .details td:first-child {
-            font-weight: bold;
-            width: 40%;
+        .receipt-table th {
+            background-color: #f0f0f0;
         }
         .signature-section {
-            margin-top: 30px;
-            width: 100%;
+            margin-top: 20px;
         }
         .signature-line {
-            margin-top: 50px;
+            margin-top: 25px;
+            border-top: 1px solid #000;
+            width: 60%;
+            padding-top: 3px;
+            font-size: 12px;
+        }
+        .witness-container {
             display: flex;
             justify-content: space-between;
+            margin-top: 25px;
         }
-        .signature-box {
+        .witness {
             width: 45%;
-            text-align: center;
         }
-        .signature-name {
-            border-top: 1px solid #000;
-            margin-top: 40px;
-            padding-top: 5px;
-            font-weight: bold;
+        .error-message {
+            color: #e74c3c;
+            font-size: 10px;
+            margin-top: 2px;
+            display: none;
         }
-        .input-section {
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 600px;
+        .action-buttons {
+            position: absolute;
+            bottom: 15px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
         }
-        .input-group {
-            margin-bottom: 10px;
+        .action-buttons button {
+            width: auto;
+            padding: 8px 15px;
+            background: #3498db;
         }
-        .input-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .action-buttons button:last-child {
+            background: #27ae60;
         }
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
+        .clear-button {
+            background: #e74c3c !important;
+            margin-top: 10px;
         }
-        .date-input {
-            text-align: right;
-            margin-bottom: 10px;
-            font-size: 12px;
+        .clear-button:hover {
+            background: #c0392b !important;
+        }
+        .signature-spacing {
+            margin-bottom: 40px;
         }
         @media print {
             body {
-                background-color: white;
-                margin: 0;
+                background: white;
                 padding: 0;
             }
-            .input-section {
+            .page-container {
+                box-shadow: none;
+                width: 100%;
+                height: 100%;
+            }
+            .form-section, .action-buttons {
                 display: none;
+            }
+            .receipt-section {
+                width: 100%;
+                padding: 0.5in;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Input Section -->
-    <div class="input-section">
-        <div class="input-group">
-            <label for="receiptDate">Receipt Date:</label>
-            <input type="date" id="receiptDate" oninput="updateReceipt()">
-        </div>
-        <div class="input-group">
-            <label for="salutation">Salutation:</label>
-            <select id="salutation" oninput="updateReceipt()">
-                <option value="MR.">MR.</option>
-                <option value="MS.">MS.</option>
-            </select>
-        </div>
-        <div class="input-group">
-            <label for="name">Client Name:</label>
-            <input type="text" id="name" placeholder="Enter Client Name" oninput="updateReceipt()">
-        </div>
-        <div class="input-group">
-            <label for="amount">Amount:</label>
-            <input type="text" id="amount" placeholder="Enter Amount" oninput="updateReceipt()">
-        </div>
-        <div class="input-group">
-            <label for="dueDate">Due Date:</label>
-            <input type="date" id="dueDate" oninput="updateReceipt()">
-        </div>
-        <div class="input-group">
-            <label for="agent">Agent Name:</label>
-            <input type="text" id="agent" placeholder="Enter Agent Name" oninput="updateReceipt()">
-        </div>
-    </div>
-
-    <!-- Receipt -->
-    <div class="receipt">
-        <div class="date-input" id="displayReceiptDate"></div>
-        
-        <div class="header">
-            <h1>QUINTILLA GROUP</h1>
-            <p>Door 3 & 4 Iloilo New Life Commercial Building</p>
-            <p>Mabini Corner Texas St., Sampaguita Iloilo City 5000</p>
-            <p>Tel. No.: 500-2527</p>
-        </div>
-
-        <div class="title">TRUST RECEIPT</div>
-
-        <div class="content">
-            <p>I hereby acknowledged the amount of <span id="displayAmount">Php ______</span> which I received from <span id="displayFrom">MS. LOIDA QUINTILLA</span>, details as follows;</p>
-            
-            <table class="details">
-                <tr>
-                    <td>PARTICULAR</td>
-                    <td>RESERVATION</td>
-                </tr>
-                <tr>
-                    <td>AMOUNT DUE</td>
-                    <td id="displayAmountDue">PHP ______</td>
-                </tr>
-            </table>
-
-            <p>I promised to pay the said amount on or before <span id="displayDueDate">__________</span></p>
-        </div>
-
-        <div class="signature-section">
-            <div class="signature-line">
-                <div class="signature-box">
-                    <p>Received:</p>
-                    <div class="signature-name" id="displayClientName"></div>
-                </div>
-                <div class="signature-box">
-                    <p>Guarantor:</p>
-                    <div class="signature-name" id="displayAgentName"></div>
-                </div>
+    <div class="page-container">
+        <div class="content-wrapper">
+            <div class="form-section">
+                <h2 style="text-align: center; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #333;">Trust Receipt Details</h2>
+                <form id="receiptForm">
+                    <div class="form-group">
+                        <label for="date">Receipt Date:</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dueDate">Payment Due Date:</label>
+                        <input type="date" id="dueDate" required>
+                        <div class="error-message" id="dueDateError">Due date must be after receipt date</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount">Amount:</label>
+                        <input type="number" id="amount" min="0" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currency">Currency:</label>
+                        <select id="currency">
+                            <option value="PHP">PHP</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="recipientName">Recipient Name:</label>
+                        <input type="text" id="recipientName" value="MS. LOIDA QUINTILLA" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="buyerName">Buyer Name:</label>
+                        <input type="text" id="buyerName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="agentName">Agent Name:</label>
+                        <input type="text" id="agentName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="witness1">Witness 1:</label>
+                        <input type="text" id="witness1" value="Dean Victor Montalvo" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="witness2">Witness 2:</label>
+                        <input type="text" id="witness2" value="Edelyn Shaine Fernandez" required>
+                    </div>
+                    
+                    <button type="button" onclick="updateReceipt()">Update Receipt</button>
+                    <button type="button" class="clear-button" onclick="clearInputs()">Clear All Inputs</button>
+                </form>
             </div>
             
-            <div class="signature-line" style="margin-top: 30px;">
-                <div class="signature-box">
-                    <p>Witness:</p>
-                    <div class="signature-name">Dean Victor Montalvo</div>
+            <div class="receipt-section">
+                <div class="receipt" id="receipt">
+                    <div class="receipt-header">
+                        <h2>TR <span id="trNumber">2025</span></h2>
+                        <div class="company-info">
+                            <p>QUINTILLA GROUP</p>
+                            <p>Door 3 & 4 Holo New Life Commercial Building</p>
+                            <p>Mabini Corner Texas St., Sampaguta Holo City 5000</p>
+                            <p>Tel. No.: 500-2527</p>
+                        </div>
+                    </div>
+                    
+                    <div class="receipt-content">
+                        <div class="receipt-title">TRUST RECEIPT</div>
+                        <div class="receipt-date" id="dateDisplay"></div>
+                        
+                        <p>I hereby acknowledge receipt of the amount of <strong id="amountDisplay"></strong> which I received from <strong id="recipientDisplay">MS. LOIDA QUINTILLA</strong>, details as follows:</p>
+                        
+                        <table class="receipt-table">
+                            <thead>
+                                <tr>
+                                    <th>PARTICULAR</th>
+                                    <th>AMOUNT DUE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>RESERVATION</td>
+                                    <td id="amountDue"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <p>I promise to pay the said amount on or before <strong id="paymentDate"></strong></p>
+                        
+                        <div class="signature-section">
+                            <p>Received by:</p>
+                            <div class="signature-line" id="receivedSignature"></div>
+                            
+                            <div class="signature-spacing"></div>
+                            
+                            <p>Guarantor:</p>
+                            <div class="signature-line" id="guarantorSignature"></div>
+                            
+                            <div class="signature-spacing"></div>
+                            
+                            <p>Approved by:</p>
+                            <div class="signature-line">LOIDA QUINTILLA</div>
+                            
+                            <div class="witness-container">
+                                <div class="witness">
+                                    <p>Witness:</p>
+                                    <div class="signature-line" id="witness1Signature">Dean Victor Montalvo</div>
+                                </div>
+                                <div class="witness">
+                                    <p>Witness:</p>
+                                    <div class="signature-line" id="witness2Signature">Edelyn Shaine Fernandez</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="signature-box">
-                    <p>&nbsp;</p>
-                    <div class="signature-name">Edelyn Shaine Fernandez</div>
+                
+                <div class="action-buttons">
+                    <button onclick="window.print()">Print Receipt</button>
+                    <button onclick="downloadPDF()">Download PDF</button>
                 </div>
             </div>
         </div>
@@ -201,37 +321,112 @@
 
     <script>
         function updateReceipt() {
-            // Get input values
-            const receiptDate = document.getElementById('receiptDate').value;
-            const salutation = document.getElementById('salutation').value;
-            const name = document.getElementById('name').value;
+            // Get form values
+            const dateInput = document.getElementById('date').value;
+            const dueDateInput = document.getElementById('dueDate').value;
             const amount = document.getElementById('amount').value;
-            const dueDate = document.getElementById('dueDate').value;
-            const agent = document.getElementById('agent').value;
-
+            const currency = document.getElementById('currency').value;
+            const recipientName = document.getElementById('recipientName').value;
+            const buyerName = document.getElementById('buyerName').value;
+            const agentName = document.getElementById('agentName').value;
+            const witness1 = document.getElementById('witness1').value;
+            const witness2 = document.getElementById('witness2').value;
+            
+            // Validate due date
+            const receiptDate = new Date(dateInput);
+            const dueDate = new Date(dueDateInput);
+            const dueDateError = document.getElementById('dueDateError');
+            
+            if (dueDate <= receiptDate) {
+                dueDateError.style.display = 'block';
+                return;
+            } else {
+                dueDateError.style.display = 'none';
+            }
+            
             // Format dates
-            const formattedReceiptDate = receiptDate ? new Date(receiptDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '__________';
-            const formattedDueDate = dueDate ? new Date(dueDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '__________';
-
+            const formattedReceiptDate = receiptDate.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+            }).toUpperCase();
+            
+            const formattedDueDate = dueDate.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+            }).toUpperCase();
+            
             // Format amount
-            const formattedAmount = amount ? `Php ${parseFloat(amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'Php ______';
-            const formattedAmountDue = amount ? `PHP ${parseFloat(amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'PHP ______';
-
-            // Update receipt
-            document.getElementById('displayReceiptDate').textContent = formattedReceiptDate;
-            document.getElementById('displayAmount').textContent = formattedAmount;
-            document.getElementById('displayAmountDue').textContent = formattedAmountDue;
-            document.getElementById('displayDueDate').textContent = formattedDueDate;
-            document.getElementById('displayClientName').textContent = name ? `${salutation} ${name.toUpperCase()}` : '';
-            document.getElementById('displayAgentName').textContent = agent ? agent.toUpperCase() : '';
+            const formattedAmount = new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+            
+            // Update receipt display
+            document.getElementById('trNumber').textContent = receiptDate.getFullYear();
+            document.getElementById('dateDisplay').textContent = formattedReceiptDate;
+            document.getElementById('amountDisplay').textContent = `${currency} ${formattedAmount}`;
+            document.getElementById('recipientDisplay').textContent = recipientName;
+            document.getElementById('amountDue').textContent = `${currency} ${formattedAmount}`;
+            document.getElementById('paymentDate').textContent = formattedDueDate;
+            document.getElementById('receivedSignature').textContent = buyerName;
+            document.getElementById('guarantorSignature').textContent = agentName;
+            document.getElementById('witness1Signature').textContent = witness1;
+            document.getElementById('witness2Signature').textContent = witness2;
         }
 
-        // Set default receipt date to today
-        window.onload = function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('receiptDate').value = today;
-            updateReceipt();
-        };
+        function clearInputs() {
+            // Clear all inputs except the protected ones
+            document.getElementById('date').value = '';
+            document.getElementById('dueDate').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('currency').value = 'PHP';
+            document.getElementById('buyerName').value = '';
+            document.getElementById('agentName').value = '';
+            
+            // Keep these values as specified
+            document.getElementById('recipientName').value = 'MS. LOIDA QUINTILLA';
+            document.getElementById('witness1').value = 'Dean Victor Montalvo';
+            document.getElementById('witness2').value = 'Edelyn Shaine Fernandez';
+            
+            // Clear the receipt display but keep TR 2025 as default
+            document.getElementById('trNumber').textContent = '2025';
+            document.getElementById('dateDisplay').textContent = '';
+            document.getElementById('amountDisplay').textContent = '';
+            document.getElementById('amountDue').textContent = '';
+            document.getElementById('paymentDate').textContent = '';
+            document.getElementById('receivedSignature').textContent = '';
+            document.getElementById('guarantorSignature').textContent = '';
+            
+            // Hide any error messages
+            document.getElementById('dueDateError').style.display = 'none';
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('receipt');
+            const opt = {
+                margin: 0.5,
+                filename: 'trust_receipt.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+        
+        // Initialize with empty values but keep TR 2025
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('trNumber').textContent = '2025';
+            // Clear other inputs
+            document.getElementById('date').value = '';
+            document.getElementById('dueDate').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('currency').value = 'PHP';
+            document.getElementById('buyerName').value = '';
+            document.getElementById('agentName').value = '';
+        });
     </script>
 </body>
 </html>
